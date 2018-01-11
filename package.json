@@ -1,0 +1,88 @@
+{
+    "name": "preview-jsdoc",
+    "displayName": "Preview JSDOC",
+    "description": "Provide a simple preview of your jsdoc",
+    "version": "0.0.1",
+    "publisher": "ludorival",
+    "engines": {
+        "vscode": "^1.19.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:javascript",
+        "onLanguage:markdown"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "configuration" :[
+            {
+                "type": "object",
+      "title": "JSDOC Preview configuration",
+      "properties": {
+        "previewjsdoc.autoOpenBrowser": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open the browser window when saving a js or md file"
+        },
+        "previewjsdoc.port": {
+          "type": "number",
+          "default": 3001,
+          "description": "Port where the server runs"
+        },
+        "previewjsdoc.conf" : {
+            "type" : "object",
+            "description": "JSON Configuration options",
+            "default" : {
+                "plugins": [],
+                "recurseDepth": 10,
+                "source": {
+                    "includePattern": ".+\\.js(doc|x)?$",
+                    "excludePattern": "(^|\\/|\\\\)_"
+                },
+                "sourceType": "module",
+                "tags": {
+                    "allowUnknownTags": true,
+                    "dictionaries": ["jsdoc","closure"]
+                },
+                "templates": {
+                    "cleverLinks": false,
+                    "monospaceLinks": false
+                },
+                "opts": {
+                    "encoding": "utf8",      
+                    "recurse": true
+                }
+            }
+        }
+      }
+            }
+        ],
+        "commands": [
+            {
+                "command": "extension.sayHello",
+                "title": "Hello World"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "dependencies": {
+        "express": "^4.16.2",
+        "socket.io": "^1.7.2",
+        "opn": "^4.0.2",
+        "mkdirp": "^0.5.1"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
