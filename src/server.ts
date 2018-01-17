@@ -5,7 +5,8 @@ import * as path from 'path';
 
 interface ServerOptions {
     root : string,
-    port : number
+    port : number,
+    outputChannel : vscode.OutputChannel,
     onDidStart : () => void
 }
 export default class Server {
@@ -19,12 +20,23 @@ export default class Server {
         const http = require('http').Server(app);
         const io = require('socket.io')(http);
 
-
+        const toFile = (url) => {
+            switch (url) {
+                case '/':
+                    return path.join(options.root, 'index.html');
+                case '/styles/preview-jsdoc.css':
+                    return path.join(__dirname, '..', 'styles.css');
+                default:
+                    return path.join(options.root, url);
+            }
+        }
         app.get('*', function(req,res) {
-            const url = req.url === '/' ? 'index.html' : req.url;
-            let file = path.resolve(path.join(options.root, url));
+
+            let file = path.resolve(toFile(req.url));
             if (fs.existsSync(file)) {
                 res.sendFile(file)
+            } else if (req.url === '/') {
+                res.sendFile(path.join(__dirname, '..', 'tmp.html'));
             } else {
                 res.status(404).send("Not Found")
             }
@@ -32,6 +44,16 @@ export default class Server {
 
         this.sockets = {};
         var nextSocketId = 0;
+        http.on('error', async (e) => {
+            if (e.code === 'EADDRINUSE') {
+               const result = await vscode.window.showWarningMessage(`The port ${options.port} is already in use. Please change the port in the setting previewjsdoc.port !`, 'Open settings');
+               if (result) {
+                   // open settings
+                   await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+               }
+            }
+            options.outputChannel.append( `Error ${e}`);
+        });
         http.on('connection', (socket) => {
             var socketId = nextSocketId++;
             this.sockets[socketId] = socket;

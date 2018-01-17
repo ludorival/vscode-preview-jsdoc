@@ -13,7 +13,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm run watch"
+            "preLaunchTask": "npm"
         }
     ]
 }

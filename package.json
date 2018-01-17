@@ -4,6 +4,11 @@
     "description": "Provide a simple preview of your jsdoc",
     "version": "0.0.1",
     "publisher": "ludorival",
+    "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/ludorival/vscode-preview-jsdoc.git"
+    },
     "engines": {
         "vscode": "^1.19.0"
     },
@@ -33,7 +38,7 @@
         },
         "previewjsdoc.conf" : {
             "type" : "object",
-            "description": "JSON Configuration options",
+            "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
             "default" : {
                 "plugins": [],
                 "recurseDepth": 10,
@@ -55,14 +60,29 @@
                     "recurse": true
                 }
             }
+        },
+        "previewjsdoc.output" : {
+            "type" : "string",
+            "description": "The output where jsdoc generates files. \nIf not defined, the default output is in a cache directory."
+        },
+        "previewjsdoc.tutorials" : {
+            "type" : "array",
+            "description": "List of tutorials paths which will be concatenated to a single one and used instead of opts.tutorials",
+            "default" : []
+        },
+        "previewjsdoc.withPrivate" : {
+            "type" : "boolean",
+            "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
+            "default" : false
         }
       }
             }
         ],
         "commands": [
             {
-                "command": "extension.sayHello",
-                "title": "Hello World"
+                "command": "previewjsdoc.openBrowser",
+                "title": "Open Browser",
+                "category": "Preview JSDoc"
             }
         ]
     },
@@ -77,7 +97,7 @@
         "express": "^4.16.2",
         "socket.io": "^1.7.2",
         "opn": "^4.0.2",
-        "mkdirp": "^0.5.1"
+        "copyfiles": "^1.2.0"
     },
     "devDependencies": {
         "typescript": "^2.6.1",
