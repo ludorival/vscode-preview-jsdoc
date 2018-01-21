@@ -2,12 +2,12 @@
     "name": "preview-jsdoc",
     "displayName": "Preview JSDOC",
     "description": "Provide a simple preview of your jsdoc",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "publisher": "ludorival",
     "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/ludorival/vscode-preview-jsdoc.git"
+        "type": "git",
+        "url": "https://github.com/ludorival/vscode-preview-jsdoc.git"
     },
     "engines": {
         "vscode": "^1.19.0"
@@ -21,61 +21,64 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "configuration" :[
+        "configuration": [
             {
                 "type": "object",
-      "title": "JSDOC Preview configuration",
-      "properties": {
-        "previewjsdoc.autoOpenBrowser": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically open the browser window when saving a js or md file"
-        },
-        "previewjsdoc.port": {
-          "type": "number",
-          "default": 3001,
-          "description": "Port where the server runs"
-        },
-        "previewjsdoc.conf" : {
-            "type" : "object",
-            "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
-            "default" : {
-                "plugins": [],
-                "recurseDepth": 10,
-                "source": {
-                    "includePattern": ".+\\.js(doc|x)?$",
-                    "excludePattern": "(^|\\/|\\\\)_"
-                },
-                "sourceType": "module",
-                "tags": {
-                    "allowUnknownTags": true,
-                    "dictionaries": ["jsdoc","closure"]
-                },
-                "templates": {
-                    "cleverLinks": false,
-                    "monospaceLinks": false
-                },
-                "opts": {
-                    "encoding": "utf8",      
-                    "recurse": true
+                "title": "JSDOC Preview configuration",
+                "properties": {
+                    "previewjsdoc.autoOpenBrowser": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically open the browser window when saving a js or md file"
+                    },
+                    "previewjsdoc.port": {
+                        "type": "number",
+                        "default": 3001,
+                        "description": "Port where the server runs"
+                    },
+                    "previewjsdoc.conf": {
+                        "type": "object",
+                        "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
+                        "default": {
+                            "plugins": [],
+                            "recurseDepth": 10,
+                            "source": {
+                                "includePattern": ".+\\.js(doc|x)?$",
+                                "excludePattern": "(^|\\/|\\\\)_"
+                            },
+                            "sourceType": "module",
+                            "tags": {
+                                "allowUnknownTags": true,
+                                "dictionaries": [
+                                    "jsdoc",
+                                    "closure"
+                                ]
+                            },
+                            "templates": {
+                                "cleverLinks": false,
+                                "monospaceLinks": false
+                            },
+                            "opts": {
+                                "encoding": "utf8",
+                                "recurse": true
+                            }
+                        }
+                    },
+                    "previewjsdoc.output": {
+                        "type": "string",
+                        "description": "The output where jsdoc generates files. \nIf not defined, the default output is in a cache directory."
+                    },
+                    "previewjsdoc.tutorials": {
+                        "type": "array",
+                        "description": "List of tutorials paths which will be concatenated to a single one and used instead of opts.tutorials",
+                        "default": []
+                    },
+                    "previewjsdoc.withPrivate": {
+                        "type": "boolean",
+                        "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
+                        "default": false
+                    }
                 }
-            }
-        },
-        "previewjsdoc.output" : {
-            "type" : "string",
-            "description": "The output where jsdoc generates files. \nIf not defined, the default output is in a cache directory."
-        },
-        "previewjsdoc.tutorials" : {
-            "type" : "array",
-            "description": "List of tutorials paths which will be concatenated to a single one and used instead of opts.tutorials",
-            "default" : []
-        },
-        "previewjsdoc.withPrivate" : {
-            "type" : "boolean",
-            "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
-            "default" : false
-        }
-      }
             }
         ],
         "commands": [
