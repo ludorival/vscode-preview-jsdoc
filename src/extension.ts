@@ -217,6 +217,7 @@ class JsdocController {
         const configuration = vscode.workspace.getConfiguration('previewjsdoc');
         const jsdocConf = configuration.get<{ source : { include : string[] }}>('conf');
         let sources = path.resolve(this.sourceUri.fsPath, '..');
+        let workspaceFolder = vscode.workspace.getWorkspaceFolder(this.sourceUri);
         // check in the include sources the current file to analyse is not a part of them
         if (jsdocConf.source.include) {
             const find = jsdocConf.source.include.find((value) => {
@@ -229,7 +230,7 @@ class JsdocController {
         }
         
          return new Promise((resolve, reject) => {
-            let args =  ['-c', `"${this.confFile}"`, sources, '--verbose', '-d', `"${this.root}"`];
+            let args =  ['-c', `"${this.confFile}"`, `"${sources}"`, '--verbose', '-d', `"${this.root}"`];
             const withPrivate = configuration.get<boolean>('withPrivate');
             if (withPrivate) {
                 args.push('-p');
@@ -237,9 +238,9 @@ class JsdocController {
             const overrideTutorials = configuration.get<string[]>('tutorials');
             if (overrideTutorials && overrideTutorials.length) {
                 args.push('-u');
-                args.push(this.tutorials);
+                args.push(`${this.tutorials}`);
             }
-            const spawn = cp.spawn('jsdoc', args, {shell : true});
+            const spawn = cp.spawn('jsdoc', args, {shell : true, cwd : `${workspaceFolder.uri.fsPath}`});
             this.outputChannel.appendLine(`Execute the command line \n \tjsdoc ${args.join(' ')}`);
             spawn.stdout.on('data', (data) => {
                 this.outputChannel.append(data.toString());
