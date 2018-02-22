@@ -221,7 +221,11 @@ class JsdocController {
         // check in the include sources the current file to analyse is not a part of them
         if (jsdocConf.source.include) {
             const find = jsdocConf.source.include.find((value) => {
-                const relative = path.relative(path.resolve(value), sources);
+                let p = value;
+                if (!path.isAbsolute(value)) {
+                    p = path.join(workspaceFolder.uri.fsPath, value);
+                }
+                const relative = path.relative(p, sources);
                 return !relative.startsWith('..');
             });
             if (find) {
@@ -230,7 +234,10 @@ class JsdocController {
         }
         
          return new Promise((resolve, reject) => {
-            let args =  ['-c', `"${this.confFile}"`, `"${sources}"`, '--verbose', '-d', `"${this.root}"`];
+            let args =  ['-c', `"${this.confFile}"`, '--verbose', '-d', `"${this.root}"`];
+            if (sources) {
+                args.push(`"${sources}"`);
+            }
             const withPrivate = configuration.get<boolean>('withPrivate');
             if (withPrivate) {
                 args.push('-p');
