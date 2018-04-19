@@ -90,11 +90,12 @@ class JsdocController {
         if (updateConf) {
             // change the conf to override the default layout template
             const jsdocConfig : { opts : any, templates : any} = vscode.workspace.getConfiguration('previewjsdoc').get('conf');
-            jsdocConfig.templates = jsdocConfig.templates || {}
-            jsdocConfig.templates.default = {
+            const json = JSON.parse(JSON.stringify(jsdocConfig));
+            json.templates = jsdocConfig.templates || {}
+            json.templates.default = {
                 layoutFile : path.resolve(__dirname, '..', 'layout.tmpl')
             };
-            fs.writeFile(this.confFile, JSON.stringify(jsdocConfig, null, 2));
+            fs.writeFile(this.confFile, JSON.stringify(json, null, 2));
         }
         if (this.server && (updatePort || updateOutput)) {
             // close the server if the port has changed or the output change
