@@ -69,11 +69,19 @@ export default class Server {
         this.http = http;
     }
     notifyJSDocWillComputed() {
-       this.io.emit('reload-jsdoc', 'onWillJsDocComputed');
+        try {  
+            this.io.emit('reload-jsdoc', 'onWillJsDocComputed');
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     notifyJSDocComputed() {
-        this.io.emit('reload-jsdoc', 'onDidJsDocComputed');
+        try {  
+            this.io.emit('reload-jsdoc', 'onDidJsDocComputed');
+        } catch (error) {
+            console.error(error);
+        }
     }
     close() {
         this.io.close()
