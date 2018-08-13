@@ -2,7 +2,7 @@
     "name": "preview-jsdoc",
     "displayName": "Preview JSDOC",
     "description": "Provide a simple preview of your jsdoc",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "publisher": "ludorival",
     "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
     "repository": {
@@ -43,6 +43,7 @@
                             "plugins": [],
                             "recurseDepth": 10,
                             "source": {
+                                "exclude":["node_modules"],
                                 "includePattern": ".+\\.js(doc|x)?$",
                                 "excludePattern": "(^|\\/|\\\\)_"
                             },

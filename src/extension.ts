@@ -21,6 +21,7 @@ class JsdocController {
     sourceUri : vscode.Uri;
     opened : boolean;
     outputChannel : vscode.OutputChannel;
+    forceOpenBrowser : boolean = false;
     constructor(private storagePath : string) {
         // create the storage path if not exist
         const output = this.output;
@@ -36,6 +37,18 @@ class JsdocController {
 
     async openBrowser() {
         //
+        this.forceOpenBrowser = false;
+        if (!this.server) {
+            this.forceOpenBrowser = true;
+            this.createServer();
+            return;
+        }
+        if (!this.sourceUri) {
+            if (vscode.window.activeTextEditor && ACCEPTED_EXT.indexOf(path.extname(vscode.window.activeTextEditor.document.fileName)) >= 0) {
+                // the current saved document is not the active document ignore it
+                this.sourceUri = vscode.Uri.file(vscode.window.activeTextEditor.document.fileName);
+           }
+        }
         const port  = vscode.workspace.getConfiguration('previewjsdoc').get<number>('port');
         const url = `http://localhost:${port}`;
         this.opened = true;
@@ -48,7 +61,7 @@ class JsdocController {
     }
 
     async onDidServerStart() {
-        if (vscode.workspace.getConfiguration('previewjsdoc').get<boolean>('autoOpenBrowser')) {
+        if (vscode.workspace.getConfiguration('previewjsdoc').get<boolean>('autoOpenBrowser') || this.forceOpenBrowser) {
             return this.openBrowser();
         }
 
@@ -91,11 +104,16 @@ class JsdocController {
             // change the conf to override the default layout template
             const jsdocConfig : { opts : any, templates : any} = vscode.workspace.getConfiguration('previewjsdoc').get('conf');
             const json = JSON.parse(JSON.stringify(jsdocConfig));
-            json.templates = jsdocConfig.templates || {}
-            json.templates.default = {
-                layoutFile : path.resolve(__dirname, '..', 'layout.tmpl')
-            };
+            if (!jsdocConfig.templates) {
+                json.templates = {
+                    default : {
+                    layoutFile : path.resolve(__dirname, '..', 'layout.tmpl')
+                    }
+                };
+                
+            }
             fs.writeFile(this.confFile, JSON.stringify(json, null, 2));
+            
         }
         if (this.server && (updatePort || updateOutput)) {
             // close the server if the port has changed or the output change
@@ -185,9 +203,11 @@ class JsdocController {
             this.countRequested += 1;
             return;
         }
-        this.countRequested += 1;
+        
         this.server.notifyJSDocWillComputed();
         try {
+            
+            this.countRequested += 1;
             await this.runJsDoc();
             this.countRequested -= 1;
             if (this.countRequested > 0) {
