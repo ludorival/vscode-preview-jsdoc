@@ -27,14 +27,22 @@ class JsdocController {
         const output = this.output;
 
         this.outputChannel = vscode.window.createOutputChannel('PreviewJsDoc');
-        // force the change of configuration to create output directory and conf if need
-        this.onDidChangeConfiguration({affectsConfiguration : (section, uri)=> {
-            return ['previewjsdoc', 'previewjsdoc.output', 'previewjsdoc.conf'].indexOf(section) >=0;
-        }});
+       
 
         
     }
 
+    async initialize() {
+        try {
+            // force the change of configuration to create output directory and conf if need
+            await this.onDidChangeConfiguration({affectsConfiguration : (section, uri)=> {
+                return ['previewjsdoc', 'previewjsdoc.output', 'previewjsdoc.conf'].indexOf(section) >=0;
+            }});
+        } catch (error) {
+            this.outputChannel.show()
+            this.outputChannel.appendLine(`Error during initialisation : ${error && error.message}`)
+        }
+    }
     async openBrowser() {
         //
         this.forceOpenBrowser = false;
@@ -83,7 +91,7 @@ class JsdocController {
         return path.join(this.output, 'tutorials');
     }
 
-    onDidChangeConfiguration(e : vscode.ConfigurationChangeEvent) {
+    async onDidChangeConfiguration(e : vscode.ConfigurationChangeEvent) {
         
         if (e && !e.affectsConfiguration('previewjsdoc')) {
             return;
@@ -125,7 +133,7 @@ class JsdocController {
             return;
         }
         // run jsdoc 
-        this.runJsDoc();
+        await this.runJsDoc();
     }
 
     private createServer() {
@@ -306,6 +314,7 @@ export function activate(context: vscode.ExtensionContext) {
     // register the commands
     context.subscriptions.push(vscode.commands.registerCommand('previewjsdoc.openBrowser', jsdocController.openBrowser.bind(jsdocController)));
     
+    jsdocController.initialize();
 }
 
 // this method is called when your extension is deactivated
