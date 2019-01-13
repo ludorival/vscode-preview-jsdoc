@@ -2,37 +2,59 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as portfinder from 'portfinder';
 
 interface ServerOptions {
     root : string,
     port : number,
-    outputChannel : vscode.OutputChannel,
     onDidStart : () => void
+}
+
+function toFile(root, url) {
+    switch (url) {
+        case '/':
+            return path.join(root, 'index.html');
+        case '/styles/preview-jsdoc.css':
+            return path.join(__dirname, '..', 'styles.css');
+        default:
+            return path.join(root, url);
+    }
 }
 export default class Server {
 
-    io:any;
-    http:any;
+    readonly app: any;
+    readonly io:any;
+    readonly http:any;
     sockets: any;
+    currentRoot: string;
+    currentPort: number;
 
-    constructor(options:ServerOptions) {
-        const app = require('express')();
-        const http = require('http').Server(app);
-        const io = require('socket.io')(http);
+    constructor(private options:ServerOptions) {
+        this.app = require('express')();
+        this.http = require('http').Server(this.app);
+        this.io = require('socket.io')(this.http);
+        this.currentRoot = options.root;
 
-        const toFile = (url) => {
-            switch (url) {
-                case '/':
-                    return path.join(options.root, 'index.html');
-                case '/styles/preview-jsdoc.css':
-                    return path.join(__dirname, '..', 'styles.css');
-                default:
-                    return path.join(options.root, url);
-            }
-        }
-        app.get('*', function(req,res) {
 
-            let file = path.resolve(toFile(req.url));
+        portfinder.getPortPromise({startPort : options.port, stopPort : options.port + 1000}).then((port) => {
+            console.log(`the port is available`);
+            return this.build(port);
+        }, (err) => {
+            // all ports are avalaible, can start with the first port
+            return this.build(options.port);
+
+        })
+    }
+
+    get url() {
+        return `http://localhost:${this.currentPort}`;
+    }
+
+    async build(port : number) {
+        this.currentPort = port;
+        this.app.get('*', (req,res)  => {
+
+            let file = path.resolve(toFile(this.currentRoot, req.url));
             if (fs.existsSync(file)) {
                 res.sendFile(file)
             } else if (req.url === '/') {
@@ -44,30 +66,25 @@ export default class Server {
 
         this.sockets = {};
         var nextSocketId = 0;
-        http.on('error', async (e) => {
-            if (e.code === 'EADDRINUSE') {
-               const result = await vscode.window.showWarningMessage(`The port ${options.port} is already in use. Please change the port in the setting previewjsdoc.port !`, 'Open settings');
-               if (result) {
-                   // open settings
-                   await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
-               }
-            }
-            options.outputChannel.append( `Error ${e}`);
+        this.http.on('error', async (e) => {
+            console.error(`Error ${e}`);
         });
-        http.on('connection', (socket) => {
+        this.http.on('connection', (socket) => {
             var socketId = nextSocketId++;
             this.sockets[socketId] = socket;
             socket.on('close',  () => { delete this.sockets[socketId]; });
         });
 
-        http.listen(options.port, function(){
-            console.log('listening on *:' + options.port);
-            options.onDidStart();
+        this.http.listen(port, () => {
+            console.log(`listening on *:${port}`);
+            this.options.onDidStart();
         });
-
-        this.io = io;
-        this.http = http;
     }
+
+    setCurrentRoot(newRoot) {
+        this.currentRoot = newRoot;
+    }
+    
     notifyJSDocWillComputed() {
         try {  
             this.io.emit('reload-jsdoc', 'onWillJsDocComputed');
@@ -85,7 +102,7 @@ export default class Server {
     }
     close() {
         this.io.close()
-        for (var socketId in this.sockets) {
+        for (let socketId in this.sockets) {
             console.log('socket', socketId, 'destroyed');
             this.sockets[socketId].destroy();
         }
