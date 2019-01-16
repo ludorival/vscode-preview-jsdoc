@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as portfinder from 'portfinder';
-
+import * as htmlparser from 'node-html-parser';
 interface ServerOptions {
     root : string,
     port : number,
@@ -16,9 +16,25 @@ function toFile(root, url) {
             return path.join(root, 'index.html');
         case '/styles/preview-jsdoc.css':
             return path.join(__dirname, '..', 'styles.css');
+        case '/scripts/preview-jsdoc/preview-js-doc.js':
+            return path.join(__dirname, '..', 'script.js');
         default:
             return path.join(root, url);
     }
+}
+
+function formatFile(file : string) {
+    const data = fs.readFileSync(file).toString();
+    if (!file.endsWith('.html')) {
+        return data;
+    } 
+    const root = htmlparser.parse(data);
+    const head = root.querySelectorAll('head')[0] as htmlparser.HTMLElement;
+    head.appendChild(new htmlparser.HTMLElement('link', {}, 'type="text/css" rel="stylesheet" href="styles/preview-jsdoc.css"'))
+    head.appendChild(new htmlparser.HTMLElement('script', {}, 'src="/socket.io/socket.io.js"'))
+    head.appendChild(new htmlparser.HTMLElement('script', {}, 'src="/scripts/preview-jsdoc/preview-js-doc.js"'))
+    return root.toString();
+    
 }
 export default class Server {
 
@@ -56,7 +72,7 @@ export default class Server {
 
             let file = path.resolve(toFile(this.currentRoot, req.url));
             if (fs.existsSync(file)) {
-                res.sendFile(file)
+                res.send(formatFile(file))
             } else if (req.url === '/') {
                 res.sendFile(path.join(__dirname, '..', 'tmp.html'));
             } else {

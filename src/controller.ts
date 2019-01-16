@@ -137,7 +137,7 @@ export class JsdocController {
         (!jsdocConfExists || this.settingsHasChangedFor.jsdocConf ) && this.updateJsDocConfig();
 
         if (this.settingsHasChangedFor.output) {
-            this.server.setCurrentRoot(this.output);
+            this.server.setCurrentRoot(this.root);
         }
 
     }
