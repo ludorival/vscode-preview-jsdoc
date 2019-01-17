@@ -32,41 +32,15 @@
             "default": true,
             "description": "Automatically open the browser window when saving a js or md file"
           },
-          "previewjsdoc.port": {
-            "type": "number",
-            "default": 3001,
-            "description": "Port where the server runs"
-          },
           "previewjsdoc.conf": {
             "type": "object",
+            "deprecationMessage": "This properties is deprecated. You should use the previewjsdoc.confFile setting instead",
             "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
-            "default": {
-              "plugins": [],
-              "recurseDepth": 10,
-              "source": {
-                "exclude": [
-                  "node_modules"
-                ],
-                "includePattern": ".+\\.js(doc|x)?$",
-                "excludePattern": "(^|\\/|\\\\)_"
-              },
-              "sourceType": "module",
-              "tags": {
-                "allowUnknownTags": true,
-                "dictionaries": [
-                  "jsdoc",
-                  "closure"
-                ]
-              },
-              "templates": {
-                "cleverLinks": false,
-                "monospaceLinks": false
-              },
-              "opts": {
-                "encoding": "utf8",
-                "recurse": true
-              }
-            }
+            "default": null
+          },
+          "previewjsdoc.confFile": {
+            "type" : "string",
+            "description": "The Json configuration file, it can be relative from the workspace or absolute.\n More details on http://usejsdoc.org/about-configuring-jsdoc.html"
           },
           "previewjsdoc.output": {
             "type": "string",
@@ -106,6 +80,7 @@
     "jsdoc": "^3.5.5",
     "jsdoc-api": "^4.0.3",
     "mkdirp": "^0.5.1",
+    "node-html-parser": "^1.1.11",
     "opn": "^4.0.2",
     "portfinder": "^1.0.20",
     "socket.io": "^1.7.2",

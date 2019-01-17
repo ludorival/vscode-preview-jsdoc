@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import { JsdocController } from './controller';
 
-let jsdocController : JsdocController;
+let jsdocController: JsdocController;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -19,10 +19,18 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     // register the commands
-    context.subscriptions.push(vscode.commands.registerCommand('previewjsdoc.openBrowser', jsdocController.openBrowser.bind(jsdocController)));
+    context.subscriptions.push(vscode.commands.registerCommand('previewjsdoc.openBrowser',
+            jsdocController.openBrowser.bind(jsdocController)));
+
+    jsdocController.startServer();
 }
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-    jsdocController.server.close();
+    jsdocController.dispose();
+    jsdocController = undefined;
+}
+// usage only for testing
+export function getController() {
+    return jsdocController;
 }

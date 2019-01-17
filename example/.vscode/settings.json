@@ -1,4 +1,8 @@
 {
     "previewjsdoc.port": 3001,
-    "previewjsdoc.output": "/Users/ludovicdorival/preview-jsdoc/example/out"
+    "previewjsdoc.output": "out",
+    "previewjsdoc.tutorials": [],
+    "previewjsdoc.autoOpenBrowser": true,
+    "previewjsdoc.conf": null,
+    "previewjsdoc.confFile": "/Users/ludovicdorival/preview-jsdoc/example/out/conf.json"
 }

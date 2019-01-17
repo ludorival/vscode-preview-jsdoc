@@ -84,3 +84,15 @@
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
 }
+
+.preview-jsdoc-output {
+    background-color: #000;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 5px;
+    border: 1px solid #fefefe;
+}
+
+.preview-jsdoc-error {
+    color : #f00
+}

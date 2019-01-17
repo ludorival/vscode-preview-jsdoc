@@ -1,94 +1,27 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import Server from './server';
-import * as path from 'path';
 import * as fs from 'fs';
-import { mkdir } from './utils';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { runJsDoc } from './jsdoc';
-const open = require('opn');
+import Server from './server';
+import { mkdir, openUrl, timer } from './utils';
 
 const ACCEPTED_EXT = ['.js', '.jsx', '.md', '.json'];
-interface ChangedConfiguration {
-    output? : boolean,
-    jsdocConf? : boolean,
-    port? : boolean
+interface IChangedConfiguration {
+    output?: boolean;
 }
 export class JsdocController {
-
-    readonly server: Server;
-    countRequested: number = 0;
-    outputChannel: vscode.OutputChannel;
-    forceOpenBrowser: boolean = false;
-    serverHasStarted : boolean = false;
-    settingsHasChangedFor : ChangedConfiguration = {};
-
-    constructor(private storagePath: string) {
-        this.outputChannel = vscode.window.createOutputChannel('PreviewJsDoc');
-        const port = vscode.workspace.getConfiguration('previewjsdoc').get<number>('port');
-        this.server = new Server({
-            root: this.root,
-            port: port,
-            onDidStart: this.onDidServerStart.bind(this)
-        });
-
-    }
-
-
-    // #region commands
-    async openBrowser(forceRunJsDoc  = true) {
-        if (!this.serverHasStarted) {
-            vscode.window.showInformationMessage('The server has not started. Please wait a moment ...');
-            this.forceOpenBrowser = true;
-            return;
-        }
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            return vscode.window.showErrorMessage('There is no opening workspace');
-        }
-        if (forceRunJsDoc) {
-            return this.safeRunJsDoc(vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.fileName : workspaceFolders[0].uri.fsPath);
-        } 
-        open(this.server.url, { app: process.platform === 'darwin' ? 'safari' : null });
-    }
-    // #endregion
-    
-    // #region events
-     onDidServerStart() {
-        this.serverHasStarted = true;
-        if (this.forceOpenBrowser) {
-            return this.openBrowser();
-        }
-    }
-
-    async onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
-
-        if (e && !e.affectsConfiguration('previewjsdoc')) {
-            return;
-        }
-        
-        this.settingsHasChangedFor.output = e.affectsConfiguration('previewjsdoc.output');
-        this.settingsHasChangedFor.jsdocConf = e.affectsConfiguration('previewjsdoc.conf');
-        
-    }
-    
-     onDidSaveTextDocument(e: vscode.TextDocument) {
-        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName !== e.fileName) {
-            // the current saved document is not the active document ignore it
-            return;
-        }
-        this.safeRunJsDoc(e.uri.fsPath)
-    };
 
     // #endregion
 
     // #region getters
-   
+
     get output() {
         const { getConfiguration, getWorkspaceFolder, workspaceFolders } = vscode.workspace;
         const output = getConfiguration('previewjsdoc').get<string>('output') || this.storagePath;
-        const workspaceFolder = getWorkspaceFolder(vscode.Uri.file(output)) || workspaceFolders[0]
+        const workspaceFolder = getWorkspaceFolder(vscode.Uri.file(output)) || workspaceFolders[0];
         return path.isAbsolute(output) ? output : path.join(workspaceFolder.uri.fsPath, output);
     }
 
@@ -97,7 +30,7 @@ export class JsdocController {
     }
 
     get confFile() {
-        return path.join(this.output, 'conf.json');
+        return vscode.workspace.getConfiguration('previewjsdoc').get<string>('confFile');
     }
 
     get tutorials() {
@@ -108,33 +41,89 @@ export class JsdocController {
         return vscode.workspace.getConfiguration('previewjsdoc').get<boolean>('autoOpenBrowser');
     }
 
-    // #endregion
+    public readonly server: Server;
+    public countRequested: number = 0;
+    public outputChannel: vscode.OutputChannel;
+    public forceOpenBrowser: boolean = false;
+    public serverUrl: string;
+    public settingsHasChangedFor: IChangedConfiguration = {};
 
-    // #region JsDoc
-    private updateJsDocConfig() {
-        // change the conf to override the default layout template
-        const jsdocConfig: { opts: any, templates: any } = vscode.workspace.getConfiguration('previewjsdoc').get('conf');
-        const json = JSON.parse(JSON.stringify(jsdocConfig));
-        if (!jsdocConfig.templates) {
-            json.templates = {
-                default: {
-                    layoutFile: path.resolve(__dirname, '..', 'layout.tmpl')
-                }
-            };
-        }
-        fs.writeFile(this.confFile, JSON.stringify(json, null, 2));
+    constructor(private storagePath: string) {
+        this.outputChannel = vscode.window.createOutputChannel('PreviewJsDoc');
+        this.server = new Server({
+            root: this.root,
+        });
+
     }
 
-    async setUpIfNeeded() {
+    public startServer() {
+        this.server.run().then((url) => {
+            this.serverUrl = url;
+            if (this.forceOpenBrowser) {
+                return this.openBrowser();
+            }
+        }, () => {
+            vscode.window.showErrorMessage('The server cannot be run, the extension will not works correctly');
+        });
+    }
+
+    public dispose() {
+        this.server.close();
+    }
+
+    // #region commands
+    public async openBrowser(forceOpenBrowser: boolean = true, currentSource?: string) {
+        if (!this.serverUrl) {
+            vscode.window.showInformationMessage('The server has not started. Please wait a moment ...');
+            this.forceOpenBrowser = true;
+            return;
+        }
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            return vscode.window.showErrorMessage('There is no opening workspace');
+        }
+        openUrl(this.serverUrl, forceOpenBrowser || this.server.hasActiveConnection());
+        await timer(500);
+        await this.safeRunJsDoc(currentSource || vscode.window.activeTextEditor ?
+                vscode.window.activeTextEditor.document.fileName :
+                workspaceFolders[0].uri.fsPath);
+    }
+    // #endregion
+
+    // #region events
+
+    public async onDidChangeConfiguration(e: vscode.ConfigurationChangeEvent) {
+
+        if (e && !e.affectsConfiguration('previewjsdoc')) {
+            return;
+        }
+        this.settingsHasChangedFor.output = e.affectsConfiguration('previewjsdoc.output');
+    }
+
+     public onDidSaveTextDocument(e: vscode.TextDocument) {
+        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName !== e.fileName) {
+            // the current saved document is not the active document ignore it
+            return;
+        }
+        if (!this.autoOpenBrowser) {
+            return;
+        }
+        this.openBrowser(false, e.uri.fsPath).catch(this.onError);
+    }
+
+    public async setUpIfNeeded() {
 
         const outputExists = fs.existsSync(this.output);
         const tutorialsExists = fs.existsSync(this.tutorials);
         const jsdocConfExists = fs.existsSync(this.confFile);
+        if (!outputExists) {
+            await mkdir(this.output);
+        }
+        if (!tutorialsExists) {
+            await mkdir(this.tutorials);
+        }
 
-        !outputExists && await mkdir(this.output);
-        !tutorialsExists && await mkdir(this.tutorials);
-
-        (!jsdocConfExists || this.settingsHasChangedFor.jsdocConf ) && this.updateJsDocConfig();
+        await this.updateJsDocConfig();
 
         if (this.settingsHasChangedFor.output) {
             this.server.setCurrentRoot(this.output);
@@ -142,44 +131,79 @@ export class JsdocController {
 
     }
 
-    private async safeRunJsDoc(source : string) {
+    private onError = (error) => {
+        vscode.window.showErrorMessage(`There is an issue when executing the preview jsdoc.
+        Check the output for more information`);
+    }
+    // #endregion
+
+    // #region JsDoc
+    private async updateJsDocConfig() {
+        if (this.confFile) {
+            return;
+        }
+        const configuration = vscode.workspace.getConfiguration('previewjsdoc');
+        const jsdocConfig = configuration.get('conf');
+
+        if (jsdocConfig) {
+            vscode.window.showWarningMessage(
+                `The setting previewjsdoc.conf is deprecated, it will be replaced by previewjsdoc.confFile instead`);
+            const json = JSON.parse(JSON.stringify(jsdocConfig));
+            const confFile = path.join(this.output, 'conf.json');
+            fs.writeFile(confFile, JSON.stringify(json, null, 2));
+            await configuration.update('conf', null);
+            await configuration.update('confFile', confFile);
+        }
+
+    }
+
+    private async safeRunJsDoc(source: string) {
         if (this.countRequested > 0) {
             this.countRequested += 1;
             return;
         }
-        
+
         let error;
-        this.server.notifyJSDocWillComputed();
         try {
+            this.server.notifyJSDocWillComputed();
             await this.setUpIfNeeded();
             this.countRequested += 1;
             await this.runJsDoc(source);
             this.countRequested -= 1;
             if (this.countRequested > 0) {
                 // chained save events
-                this.runJsDoc(source);
+                await this.runJsDoc(source);
             }
+            this.server.notifyJSDocComputed();
         } catch (err) {
             error = err || new Error('Error when running jsdoc');
         }
-
-        this.server.notifyJSDocComputed();
         this.countRequested = 0;
         if (error) {
-            throw error
+            throw error;
         }
-        return this.autoOpenBrowser && this.openBrowser(false);
     }
 
-    private async runJsDoc(source : string) {
+    private async runJsDoc(source: string) {
         return runJsDoc({
-            destination : this.root, 
-            conf: this.confFile, 
-            outputChannel: this.outputChannel, 
-            source, 
-            tutorials : this.tutorials
-        })
-        //outputs && outputs.forEach(this.outputChannel.appendLine.bind(this.outputChannel))
+            destination : this.root,
+            conf: this.confFile,
+            onLogInfo : this.onLogInfo,
+            onLogError : this.onLogError,
+            source,
+            tutorials : this.tutorials,
+        });
+    }
+
+    private onLogInfo = (message) => {
+        this.outputChannel.appendLine(message);
+        this.server.notifyJsDocLogInfo(message);
+    }
+
+    private onLogError = (message) => {
+        this.outputChannel.show();
+        this.outputChannel.appendLine(message);
+        this.server.notifyJsDocLogError(message);
     }
 
     // #endregion
