@@ -66,7 +66,7 @@ const saveAFile = async () => {
         editBuilder.replace(new vscode.Range(new vscode.Position(1, 3), new vscode.Position(1, 33)),
             'Class representing a point'));
     await document.save();
-    await timer(2000);
+    await timer(4000);
 };
 
 const updateConfig = async (configKey, value) => {
@@ -119,7 +119,8 @@ suite('Extension Tests', () => {
         // then
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.called);
-        assert(fs.existsSync(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'out', 'www', 'index.html')));
+        const currentWs = vscode.workspace.workspaceFolders[0];
+        assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
 
     });
 
