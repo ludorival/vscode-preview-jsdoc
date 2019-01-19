@@ -1,5 +1,5 @@
 /**
- * Class representing a 2D point
+ * Class representing a point
  */
 class Point {
     /**

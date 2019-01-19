@@ -1,112 +1,99 @@
 {
-    "name": "preview-jsdoc",
-    "displayName": "Preview JSDOC",
-    "description": "Provide a simple preview of your jsdoc",
-    "version": "1.0.4",
-    "publisher": "ludorival",
-    "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ludorival/vscode-preview-jsdoc.git"
-    },
-    "engines": {
-        "vscode": "^1.19.0"
-    },
-    "categories": [
-        "Other"
+  "name": "preview-jsdoc",
+  "displayName": "Preview JSDOC",
+  "description": "Provide a simple preview of your jsdoc",
+  "version": "2.0.0",
+  "publisher": "ludorival",
+  "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ludorival/vscode-preview-jsdoc.git"
+  },
+  "engines": {
+    "vscode": "^1.19.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:markdown",
+    "onCommand:previewjsdoc.openBrowser"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "configuration": [
+      {
+        "type": "object",
+        "title": "JSDOC Preview configuration",
+        "properties": {
+          "previewjsdoc.autoOpenBrowser": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically open the browser window when saving a js or md file"
+          },
+          "previewjsdoc.conf": {
+            "type": "object",
+            "deprecationMessage": "This properties is deprecated. You should use the previewjsdoc.confFile setting instead",
+            "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
+            "default": null
+          },
+          "previewjsdoc.confFile": {
+            "type": "string",
+            "description": "The Json configuration file, it can be relative from the workspace or absolute.\n More details on http://usejsdoc.org/about-configuring-jsdoc.html"
+          },
+          "previewjsdoc.output": {
+            "type": "string",
+            "description": "The output where jsdoc generates files. \nIf not defined, the default output is in a cache directory."
+          },
+          "previewjsdoc.tutorials": {
+            "type": "array",
+            "description": "List of tutorials paths which will be concatenated to a single one and used instead of opts.tutorials",
+            "default": []
+          },
+          "previewjsdoc.withPrivate": {
+            "type": "boolean",
+            "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
+            "default": false
+          }
+        }
+      }
     ],
-    "activationEvents": [
-        "onLanguage:javascript",
-        "onLanguage:markdown"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "configuration": [
-            {
-                "type": "object",
-                "title": "JSDOC Preview configuration",
-                "properties": {
-                    "previewjsdoc.autoOpenBrowser": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "Automatically open the browser window when saving a js or md file"
-                    },
-                    "previewjsdoc.port": {
-                        "type": "number",
-                        "default": 3001,
-                        "description": "Port where the server runs"
-                    },
-                    "previewjsdoc.conf": {
-                        "type": "object",
-                        "description": "JSON Configuration options. More details on http://usejsdoc.org/about-configuring-jsdoc.html",
-                        "default": {
-                            "plugins": [],
-                            "recurseDepth": 10,
-                            "source": {
-                                "exclude":["node_modules"],
-                                "includePattern": ".+\\.js(doc|x)?$",
-                                "excludePattern": "(^|\\/|\\\\)_"
-                            },
-                            "sourceType": "module",
-                            "tags": {
-                                "allowUnknownTags": true,
-                                "dictionaries": [
-                                    "jsdoc",
-                                    "closure"
-                                ]
-                            },
-                            "templates": {
-                                "cleverLinks": false,
-                                "monospaceLinks": false
-                            },
-                            "opts": {
-                                "encoding": "utf8",
-                                "recurse": true
-                            }
-                        }
-                    },
-                    "previewjsdoc.output": {
-                        "type": "string",
-                        "description": "The output where jsdoc generates files. \nIf not defined, the default output is in a cache directory."
-                    },
-                    "previewjsdoc.tutorials": {
-                        "type": "array",
-                        "description": "List of tutorials paths which will be concatenated to a single one and used instead of opts.tutorials",
-                        "default": []
-                    },
-                    "previewjsdoc.withPrivate": {
-                        "type": "boolean",
-                        "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
-                        "default": false
-                    }
-                }
-            }
-        ],
-        "commands": [
-            {
-                "command": "previewjsdoc.openBrowser",
-                "title": "Open Browser",
-                "category": "Preview JSDoc"
-            }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
-    },
-    "dependencies": {
-        "express": "^4.16.2",
-        "socket.io": "^1.7.2",
-        "opn": "^4.0.2",
-        "copyfiles": "^1.2.0"
-    },
-    "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
-        "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
-    }
+    "commands": [
+      {
+        "command": "previewjsdoc.openBrowser",
+        "title": "Open Browser",
+        "category": "Preview JSDoc"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "publish": "echo \"Publish the extension on the market place\" && vsce publish -p $VSCODE_TOKEN > /dev/null 2>&1 && Succesfully deployed on Vscode marketplace"
+  },
+  "dependencies": {
+    "copyfiles": "^1.2.0",
+    "express": "^4.16.2",
+    "jsdoc": "^3.5.5",
+    "jsdoc-api": "^4.0.3",
+    "mkdirp": "^0.5.1",
+    "node-html-parser": "^1.1.11",
+    "opn": "^4.0.2",
+    "portfinder": "^1.0.20",
+    "socket.io": "^1.7.2",
+    "walk-back": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^7.0.43",
+    "rimraf": "^2.6.3",
+    "sinon": "^7.2.2",
+    "typescript": "^2.6.1",
+    "vsce": "^1.54.0",
+    "vscode": "^1.1.6"
+  }
 }

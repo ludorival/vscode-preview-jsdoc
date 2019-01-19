@@ -5,7 +5,7 @@
         {
             "type": "extensionHost",
             "request": "launch",
-            "name": "Lancer l'extension",
+            "name": "Launch Extension",
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
@@ -13,7 +13,22 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm"
+            "preLaunchTask": "build"
+        },
+        {
+            "type": "extensionHost",
+            "request": "launch",
+            "name": "Extension test",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "${workspaceFolder}/example",
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "preLaunchTask": "build"
         }
     ]
 }
