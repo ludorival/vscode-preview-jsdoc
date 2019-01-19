@@ -25,3 +25,4 @@ deploy:
   on:
     branch: master
     condition: "$TRAVIS_OS_NAME = osx"
+    tags: true
