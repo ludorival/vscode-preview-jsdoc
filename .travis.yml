@@ -20,9 +20,8 @@ script:
 
 after_script:
   if: os = osx AND branch = master
-    - export VSCODE_PAT=$VSCODE_TOKEN
     - echo "Publish the extension on the market place"
-    - npm run publish $VSCODE_TOKEN
+    - npm run publish -- $VSCODE_TOKEN
 
 env:
   global:
