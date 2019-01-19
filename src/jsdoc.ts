@@ -5,24 +5,12 @@ import * as vscode from 'vscode';
 import * as walkBack from 'walk-back';
 import { asAbsolutePath, copyFiles } from './utils';
 
-const ACCEPTED_EXT = ['.js', '.jsx', '.md', '.json'];
 
 const jsdocPath = walkBack(
       path.join(__dirname, '..'),
       path.join('node_modules', 'jsdoc', 'jsdoc.js'),
     );
 
-function getSupportedExtension(source: string) {
-    if (source) {
-        const extName       = path.extname(source.toLowerCase());
-        const relativePath  = vscode.workspace.asRelativePath(vscode.Uri.file(source));
-        const ignoreSources = ['.vscode/settings.json'];
-        if (ACCEPTED_EXT.includes(extName) && !ignoreSources.includes(relativePath)) {
-            return extName;
-        }
-    }
-    return null;
-}
 
 function asIncludedInSource({source, root, sources}: {
     source: string, root: string, sources: string[]}): string | undefined {

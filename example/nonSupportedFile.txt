@@ -1,0 +1,8 @@
+/**
+ * Class representing a point
+ *
+ * @class Foo
+ */
+class Foo {
+
+}

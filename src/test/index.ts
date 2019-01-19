@@ -11,7 +11,11 @@
 // a possible error to the callback or null if none.
 
 import * as testRunner from 'vscode/lib/testrunner';
+import * as mock from 'mock-require';
+import * as sinon from 'sinon';
 
+const spyOpn = sinon.spy();
+mock('opn', spyOpn);
 // You can directly control Mocha options by uncommenting the following lines
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
 testRunner.configure({

@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { runJsDoc } from './jsdoc';
 import Server from './server';
-import { mkdir, openUrl, timer } from './utils';
+import { mkdir, openUrl, timer, getSupportedExtension } from './utils';
 
 const ACCEPTED_EXT = ['.js', '.jsx', '.md', '.json'];
 interface IChangedConfiguration {
@@ -102,11 +102,10 @@ export class JsdocController {
     }
 
      public onDidSaveTextDocument(e: vscode.TextDocument) {
-        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName !== e.fileName) {
+        if (!this.autoOpenBrowser
+            || vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName !== e.fileName
+            || !getSupportedExtension(e.uri.fsPath)) {
             // the current saved document is not the active document ignore it
-            return;
-        }
-        if (!this.autoOpenBrowser) {
             return;
         }
         this.openBrowser(false, e.uri.fsPath).catch(this.onError);

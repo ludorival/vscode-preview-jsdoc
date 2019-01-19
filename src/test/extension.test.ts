@@ -10,13 +10,13 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as fs from 'fs';
 import * as path from 'path';
-import * as portfinder from 'portfinder';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { JsdocController } from '../controller';
 import * as myextension from '../extension';
 import * as jsdoc from '../jsdoc';
 import * as utils from '../utils';
+
 
 const { timer } = utils;
 const deleteFolderRecursive = (p) => {
@@ -35,13 +35,15 @@ const deleteFolderRecursive = (p) => {
 
 const spyRunJsdoc = sinon.spy(jsdoc, 'runJsDoc');
 const spyExtensionActivate = sinon.spy(myextension, 'activate');
-const spyOpenUrl = sinon.spy(utils, 'openUrl');
+const spyOpenUrl = require('opn');
 
 let stubOutputChannel;
 
 const initialize = async () => {
     spyRunJsdoc.resetHistory();
     spyOpenUrl.resetHistory();
+    const jsdocController = myextension.getController();
+    if (jsdocController) jsdocController.server.sockets = {};
     deleteFolderRecursive(path.join(__dirname, '..', '..', 'example', 'out'));
     deleteFolderRecursive(path.join(__dirname, '..', '..', 'example', 'out2'));
     const configuration = vscode.workspace.getConfiguration('previewjsdoc');
@@ -52,16 +54,16 @@ const initialize = async () => {
     return configuration.update('output', 'out');
 };
 
-const openAFile = async () => {
+const openAFile = async (fileName: string = 'point.js') => {
     const currentWs = vscode.workspace.workspaceFolders[0];
-    const document = await vscode.workspace.openTextDocument(path.join(currentWs.uri.fsPath, 'point.js'));
+    const document = await vscode.workspace.openTextDocument(path.join(currentWs.uri.fsPath, fileName));
     await vscode.window.showTextDocument(document);
     await timer(2000);
     return document;
 };
 
-const saveAFile = async () => {
-    const document = await openAFile();
+const saveAFile = async (fileName: string = 'point.js') => {
+    const document = await openAFile(fileName);
     await vscode.window.activeTextEditor.edit((editBuilder) =>
         editBuilder.replace(new vscode.Range(new vscode.Position(1, 3), new vscode.Position(1, 33)),
             'Class representing a point'));
@@ -73,6 +75,11 @@ const updateConfig = async (configKey, value) => {
     const configuration = vscode.workspace.getConfiguration('previewjsdoc');
     return configuration.update(configKey, value);
 };
+
+const emulateActiveConnection = () => {
+    const jsdocController = myextension.getController();
+    jsdocController.server.sockets[0] = sinon.stub();
+}
 
 const cmdOpenBrowser = () => (vscode.commands.executeCommand('previewjsdoc.openBrowser'));
 
@@ -109,16 +116,34 @@ suite('Extension Tests', () => {
 
     });
 
-    test('should run js doc when opening a file and edit it', async () => {
+    test('should run js doc when opening a file and edit it with any opened browser', async () => {
 
         // given
         await initialize();
+
         // when
         await saveAFile();
 
         // then
         assert(spyRunJsdoc.calledOnce);
-        assert(spyOpenUrl.called);
+        assert(spyOpenUrl.calledOnce, 'a new web page should be opened again');
+        const currentWs = vscode.workspace.workspaceFolders[0];
+        assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
+
+    });
+
+    test('should run js doc when opening a file and edit it with already opened browser', async () => {
+
+        // given
+        await initialize();
+        emulateActiveConnection();
+
+        // when
+        await saveAFile();
+
+        // then
+        assert(spyRunJsdoc.calledOnce);
+        assert(!spyOpenUrl.calledOnce, 'a new web page should not be opened again');
         const currentWs = vscode.workspace.workspaceFolders[0];
         assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
 
@@ -295,4 +320,16 @@ suite('Extension Tests', () => {
         assert(spyOpenUrl.calledOnce);
     });
 
+
+    test('the browser should not be opened if the user save a non accepted format', async () => {
+        // given
+        await initialize();
+        
+        // when
+        await saveAFile('nonSupportedFile.txt');
+
+        // then
+        assert(!spyRunJsdoc.calledOnce);
+        assert(!spyOpenUrl.called);
+    });
 });
