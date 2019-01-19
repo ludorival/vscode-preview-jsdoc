@@ -1,4 +1,4 @@
-## 2.0.3
+## 2.0.4
 - Quick patch after the 2.0.0 drop
 
 ## 2.0.0
