@@ -82,7 +82,8 @@ export class JsdocController {
         if (!workspaceFolders) {
             return vscode.window.showErrorMessage('There is no opening workspace');
         }
-        openUrl(this.serverUrl, forceOpenBrowser || this.server.hasActiveConnection());
+        const shouldNotOpen = !(forceOpenBrowser || !this.server.hasActiveConnection());
+        openUrl(this.serverUrl, shouldNotOpen);
         await timer(500);
         await this.safeRunJsDoc(currentSource || vscode.window.activeTextEditor ?
                 vscode.window.activeTextEditor.document.fileName :

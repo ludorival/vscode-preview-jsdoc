@@ -94,7 +94,7 @@ function checkAndGetJsDocConf(confFile, root): {json: any, confFileExist: boolea
             }
         return { json : {source : {}, ...json}, confFileExist : true};
     }
-    vscode.window.showInformationMessage(`the jsdoc configuration file does not exist : ${confFile}`);
+    confFile && vscode.window.showInformationMessage(`the jsdoc configuration file does not exist : ${confFile}`);
     return {json : {source : {}}, confFileExist : false};
 }
 async function mergeTutorials({ source, tutorials, onLogError, onLogInfo, workspaceFolder }: IJsDocOptions) {

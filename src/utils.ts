@@ -27,8 +27,8 @@ export async function timer(timeout) {
     });
 }
 
-export function openUrl(url, hasActiveConnexion?: boolean) {
-    if (hasActiveConnexion) {
+export function openUrl(url, shouldNotOpen?: boolean) {
+    if (shouldNotOpen) {
         return;
     }
     open(url);
