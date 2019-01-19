@@ -73,7 +73,7 @@
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
-    "publish": "echo \"Publish the extension on the market place\" && node ./node_modules/vsce/out/vsce publish -p $VSCODE_TOKEN && Succesfully deployed on Vscode marketplace"
+    "publish": "node ./node_modules/vsce/out/vsce publish -p "
   },
   "dependencies": {
     "copyfiles": "^1.2.0",

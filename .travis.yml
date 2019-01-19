@@ -18,10 +18,11 @@ script:
 - export CODE_TESTS_WORKSPACE=$TRAVIS_BUILD_DIR/example
 - npm test --silent
 
-after_success:
-- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH;
-  else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-- if [ $BRANCH == "master" ]; then npm run publish;fi
+after_script:
+  if: os = osx AND branch = master
+    - export VSCODE_PAT=$VSCODE_TOKEN
+    - echo "Publish the extension on the market place"
+    - npm run publish $VSCODE_TOKEN
 
 env:
   global:
