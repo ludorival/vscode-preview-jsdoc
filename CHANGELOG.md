@@ -1,3 +1,6 @@
+## 2.0.2
+- Quick patch after the 2.0.0 drop
+
 ## 2.0.0
 - the `previewjsdoc.port` setting does not exist anymore since an available port will be chosen for the jsdoc server
 - the `previewjsdoc.conf` setting has been deprecated for `previewjsdoc.confFile`
