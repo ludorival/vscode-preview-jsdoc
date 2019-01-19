@@ -12,9 +12,17 @@ before_install:
     fi
 
 install:
-  - npm install
-  - npm run vscode:prepublish
-
+- npm install
+- npm run vscode:prepublish
 script:
-  - export CODE_TESTS_WORKSPACE=$TRAVIS_BUILD_DIR/example
-  - npm test --silent
+- export CODE_TESTS_WORKSPACE=$TRAVIS_BUILD_DIR/example
+- npm test --silent
+
+after_success:
+- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH;
+  else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+- if [ $BRANCH == "master" ]; then npm run publish;fi
+
+env:
+  global:
+    secure: SdEZFCXaoG+pqthUSHuE+78soRyf7Kuuqbtv039zIK042/aGB1Ru+obcYSBLESLlFdrFYPRZSRUBFDf9gxzEO8KELljTj6gLydiiOsH1rVP7X4/F3jJ/+y8aBSebpG3htEouTFPmVVlhLFkCnRnU19HsO5Rzbf/tq8gvp2jxNel4UzobcpPrYghnY1Tzi69aTN5LOprw3Y3VH45/DNxGOl6IivUqcPqvFgH8O4i3/s9E1qq84YMtss8eiP+OUCq58ucsUpMkj23rlGd61VNasQq9icbgVol95VGHVHXJGTG7Wn/nNtKmAzRiZPxQURV2fRlykKikkvYqlSJg2+aKmElf85NebJIWhe3PdkFLlibwIuRGwTv038CXAfvGMKQ5jQ1BexcwYnMvIhifGG9rvhNJEbNCiAQ0FrT4wP64T/cJdu4wfthmLjMbSb8CyAixVs9lrpKECmbuTurg1pLZBQV/OHtIObFFPzLy4C5s8z/K9m8dR2KL6tfBUv65A6nURtL/MfIKwwTp7gAucW9tHUzBn7tP1LcDJoJiyXlvqs7QfG+gR9t//bbPWueqvqdLuh/8ab5WLd6qO3gFjnv+z9oXKRR+9XVIL1TbKg0GAdndc4Lmtj6vjA+mX25YTM8LTcXBurCedkn+KKOdeznxV4Y4HzJfVXmT2XZt0oeAu38=

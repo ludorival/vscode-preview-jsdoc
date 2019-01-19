@@ -1,3 +1,11 @@
+## 2.0.0
+- the `previewjsdoc.port` setting does not exist anymore since an available port will be chosen for the jsdoc server
+- the `previewjsdoc.conf` setting has been deprecated for `previewjsdoc.confFile`
+- you are free to use any custom template layout for your jsdoc, the progress will still be displayed
+- On MacOS, Chrome can now be used to open the jsdoc when it is defined as default browser (issue [#16])(https://github.com/ludorival/vscode-preview-jsdoc/issues/16)
+- Relative path is now supported for the `previewjsodc.output` setting (issue [#17](https://github.com/ludorival/vscode-preview-jsdoc/issues/17))
+
+
 ## 1.0.4
 - In case of custom templates, do not override the default template layout file
 - Tentative to fix issues [#12](https://github.com/ludorival/vscode-preview-jsdoc/issues/12) [#11](https://github.com/ludorival/vscode-preview-jsdoc/issues/11) [#10](https://github.com/ludorival/vscode-preview-jsdoc/issues/10)

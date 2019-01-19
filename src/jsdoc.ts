@@ -57,7 +57,7 @@ export async function runJsDoc(options: IJsDocOptions) {
     const configuration     = vscode.workspace.getConfiguration('previewjsdoc');
     const withPrivate       = configuration.get<boolean>('withPrivate');
     const overrideTutorials = configuration.get<string[]>('tutorials');
-    const jsdocConf         = checkAndGetJsDocConf(conf);
+    const jsdocConf         = checkAndGetJsDocConf(conf, workspaceFolder.uri.fsPath);
     const sourceDirectory   = asIncludedInSource({
         source :  path.resolve(source, '..'),
         root : workspaceFolder.uri.fsPath,
@@ -82,11 +82,12 @@ export async function runJsDoc(options: IJsDocOptions) {
 
 }
 
-function checkAndGetJsDocConf(confFile): {json: any, confFileExist: boolean} {
-    if (fs.existsSync(confFile)) {
-        const json = JSON.parse(fs.readFileSync(confFile).toString());
+function checkAndGetJsDocConf(confFile, root): {json: any, confFileExist: boolean} {
+    if (confFile && fs.existsSync(confFile)) {
+        const json = JSON.parse(fs.readFileSync(asAbsolutePath({source : confFile, root})).toString());
         if (json.templates &&
             json.templates.default &&
+            json.templates.default.layoutFile &&
             path.resolve(json.templates.default.layoutFile) === path.resolve(__dirname, '..', 'layout.tmpl')) {
                 delete json.templates.default.layoutFile;
                 fs.writeFileSync(confFile, JSON.stringify(json, null, 2));

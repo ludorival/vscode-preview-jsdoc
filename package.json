@@ -2,7 +2,7 @@
   "name": "preview-jsdoc",
   "displayName": "Preview JSDOC",
   "description": "Provide a simple preview of your jsdoc",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "publisher": "ludorival",
   "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
   "repository": {
@@ -39,7 +39,7 @@
             "default": null
           },
           "previewjsdoc.confFile": {
-            "type" : "string",
+            "type": "string",
             "description": "The Json configuration file, it can be relative from the workspace or absolute.\n More details on http://usejsdoc.org/about-configuring-jsdoc.html"
           },
           "previewjsdoc.output": {
@@ -72,7 +72,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "publish": "echo \"Publish the extension on the market place\" && vsce publish -p $VSCODE_TOKEN > /dev/null 2>&1 && Succesfully deployed on Vscode marketplace"
   },
   "dependencies": {
     "copyfiles": "^1.2.0",
@@ -92,6 +93,7 @@
     "rimraf": "^2.6.3",
     "sinon": "^7.2.2",
     "typescript": "^2.6.1",
+    "vsce": "^1.54.0",
     "vscode": "^1.1.6"
   }
 }

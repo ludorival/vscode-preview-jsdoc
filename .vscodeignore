@@ -8,3 +8,5 @@ tsconfig.json
 example
 vsc-extension-quickstart.md
 vscode-preview-jsdoc.gif
+.travis.yml
+tslint.json
