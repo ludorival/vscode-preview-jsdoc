@@ -3,8 +3,15 @@ import * as mkdirp from 'mkdirp';
 import * as open from 'opn';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as walkBack from 'walk-back';
+import * as cp from 'child_process';
 
 const ACCEPTED_EXT = ['.js', '.jsx', '.md', '.json'];
+
+const jsdocPath = walkBack(
+    path.join(__dirname, '..'),
+    path.join('node_modules', 'jsdoc', 'jsdoc.js'),
+  );
 export async function mkdir(dir) {
     return new Promise((resolve, reject) => {
         mkdirp(dir, (err) => err ? reject(err) : resolve());
@@ -37,7 +44,7 @@ export function openUrl(url, shouldNotOpen?: boolean) {
 }
 
 export function asAbsolutePath({source, root}: {source: string, root: string}) {
-    return path.isAbsolute(source) ? source : path.join(root, source);
+    return !source || path.isAbsolute(source) ? source : path.join(root, source);
 }
 
 
@@ -51,4 +58,28 @@ export function getSupportedExtension(source: string) {
         }
     }
     return null;
+}
+export interface ISpawnJsDocOption {
+    destination: string,
+    root: string,
+    sourceDirectory?: string,
+    confFile? : string,
+    withPrivate? : boolean,
+    tutorials? : string
+}
+export function spawnJsdoc({destination, root, sourceDirectory, 
+    confFile, withPrivate, tutorials} : ISpawnJsDocOption) {
+    const args = [
+        jsdocPath,
+        '--verbose',
+        '-d',
+        `"${destination}"`,
+        ...(confFile ? ['-c', `"${confFile}"`] : []),
+        ...(withPrivate ? ['-p'] : []),
+        ...(tutorials ? ['-u', `"${tutorials}"`] : []),
+        ...(sourceDirectory ? [`"${sourceDirectory}"`] : []),
+    ];
+    return {spawn : cp.spawn('node', args, {shell : true, cwd : `${root}`}),
+            args};
+    
 }

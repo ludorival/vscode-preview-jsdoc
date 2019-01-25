@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ludorival/vscode-preview-jsdoc.svg?branch=master)](https://travis-ci.org/ludorival/vscode-preview-jsdoc)
+
 Simply preview your jsdoc generation on your browser.
 
 ![screencast](./vscode-preview-jsdoc.gif)

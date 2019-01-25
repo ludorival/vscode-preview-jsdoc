@@ -2,21 +2,17 @@ import * as cp from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as walkBack from 'walk-back';
-import { asAbsolutePath, copyFiles } from './utils';
+import { asAbsolutePath, copyFiles, spawnJsdoc } from './utils';
 
 
-const jsdocPath = walkBack(
-      path.join(__dirname, '..'),
-      path.join('node_modules', 'jsdoc', 'jsdoc.js'),
-    );
+
 
 
 function asIncludedInSource({source, root, sources}: {
     source: string, root: string, sources: string[]}): string | undefined {
     const find = sources.map((value) => asAbsolutePath({source: value, root}))
                         .map((absolutePath) => path.relative(absolutePath, source))
-                        .find((relativePath) => !relativePath.startsWith('..'));
+                        .find((relativePath) => relativePath.startsWith('..'));
     return find ? undefined : source;
 }
 
@@ -54,25 +50,19 @@ export async function runJsDoc(options: IJsDocOptions) {
         workspaceFolder,
         onLogInfo,
         onLogError,
-        configure: jsdocConf.confFileExist && conf,
+        configure: jsdocConf.confFileExist ? conf : undefined,
         destination,
         withPrivate,
         sourceDirectory,
         ...(overrideTutorials && overrideTutorials.length && { tutorials }),
     });
-    // return jsdoc.explain({
-    //     configure: conf,
-    //     destination,
-    //     ...(withPrivate && {private : true}),
-    //     ...(sourceDirectory && { files: [sourceDirectory] }),
-    //     ...(overrideTutorials && overrideTutorials.length && { tutorials })
-    // })
 
 }
 
 function checkAndGetJsDocConf(confFile, root): {json: any, confFileExist: boolean} {
-    if (confFile && fs.existsSync(confFile)) {
-        const json = JSON.parse(fs.readFileSync(asAbsolutePath({source : confFile, root})).toString());
+    const absoluteConfFile = asAbsolutePath({source : confFile, root});
+    if (absoluteConfFile && fs.existsSync(absoluteConfFile)) {
+        const json = JSON.parse(fs.readFileSync(absoluteConfFile).toString());
         if (json.templates &&
             json.templates.default &&
             json.templates.default.layoutFile &&
@@ -105,17 +95,7 @@ async function mergeTutorials({ source, tutorials, onLogError, onLogInfo, worksp
 async function executeCommand(
     {workspaceFolder, configure, destination, withPrivate, sourceDirectory, tutorials, onLogInfo, onLogError}) {
     return new Promise((resolve, reject) => {
-        const args = [
-            jsdocPath,
-            '--verbose',
-            '-d',
-            `"${destination}"`,
-            ...(configure ? ['-c', `"${configure}"`] : []),
-            ...(withPrivate ? ['-p'] : []),
-            ...(tutorials ? ['-u', `"${tutorials}"`] : []),
-            ...(sourceDirectory ? [`"${sourceDirectory}"`] : []),
-        ];
-        const spawn = cp.spawn('node', args, {shell : true, cwd : `${workspaceFolder.uri.fsPath}`});
+        const {spawn, args} = spawnJsdoc({destination, root: workspaceFolder.uri.fsPath, sourceDirectory, confFile : configure, tutorials, withPrivate})
         onLogInfo(`Execute the command line`);
         onLogInfo(`\tjsdoc ${args.join(' ')}`);
         spawn.stdout.on('data', (data) => {

@@ -17,7 +17,6 @@ import * as myextension from '../extension';
 import * as jsdoc from '../jsdoc';
 import * as utils from '../utils';
 
-
 const { timer } = utils;
 const deleteFolderRecursive = (p) => {
     if (fs.existsSync(p)) {
@@ -35,13 +34,16 @@ const deleteFolderRecursive = (p) => {
 
 const spyRunJsdoc = sinon.spy(jsdoc, 'runJsDoc');
 const spyExtensionActivate = sinon.spy(myextension, 'activate');
+const spySpawnJsdoc = sinon.spy(utils, 'spawnJsdoc');
 const spyOpenUrl = require('opn');
 
 let stubOutputChannel;
 
+const getCurrentWorkspace = () => vscode.workspace.workspaceFolders[0].uri.fsPath;
 const initialize = async () => {
     spyRunJsdoc.resetHistory();
     spyOpenUrl.resetHistory();
+    spySpawnJsdoc.resetHistory();
     const jsdocController = myextension.getController();
     if (jsdocController) jsdocController.server.sockets = {};
     deleteFolderRecursive(path.join(__dirname, '..', '..', 'example', 'out'));
@@ -83,6 +85,22 @@ const emulateActiveConnection = () => {
 
 const cmdOpenBrowser = () => (vscode.commands.executeCommand('previewjsdoc.openBrowser'));
 
+interface IExpectOptions {
+    destination: string,
+    sourceDirectory?: string,
+    confFile? : string,
+    withPrivate? : boolean,
+    tutorials? : string
+}
+const expectJsdocCommand = (options : IExpectOptions) => {
+    options.withPrivate = !!options.withPrivate
+    options.tutorials = options.tutorials;
+    options.confFile = options.confFile;
+    const arg = {root : vscode.workspace.workspaceFolders[0].uri.fsPath,
+        ... options};
+    sinon.assert.calledWith(spySpawnJsdoc, arg);
+    assert(fs.existsSync(path.join(options.destination, 'index.html')));
+}
 // Defines a Mocha test suite to group tests of similar kind together
 suite('Extension Tests', () => {
 
@@ -111,8 +129,10 @@ suite('Extension Tests', () => {
         // then
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
+        
         const currentWs = vscode.workspace.workspaceFolders[0];
-        assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
+        const destination = path.join(currentWs.uri.fsPath, 'out', 'www');
+        expectJsdocCommand({destination, sourceDirectory : getCurrentWorkspace()});
 
     });
 
@@ -128,7 +148,8 @@ suite('Extension Tests', () => {
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce, 'a new web page should be opened again');
         const currentWs = vscode.workspace.workspaceFolders[0];
-        assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
+        const destination = path.join(currentWs.uri.fsPath, 'out', 'www');
+        expectJsdocCommand({destination, sourceDirectory : getCurrentWorkspace()});
 
     });
 
@@ -143,9 +164,10 @@ suite('Extension Tests', () => {
 
         // then
         assert(spyRunJsdoc.calledOnce);
-        assert(!spyOpenUrl.calledOnce, 'a new web page should not be opened again');
+        assert(!spyOpenUrl.calledOnce, 'a new web page should not be opened again');      
         const currentWs = vscode.workspace.workspaceFolders[0];
-        assert(fs.existsSync(path.join(currentWs.uri.fsPath, 'out', 'www', 'index.html')));
+        const destination = path.join(currentWs.uri.fsPath, 'out', 'www');
+        expectJsdocCommand({destination, sourceDirectory: getCurrentWorkspace()});
 
     });
 
@@ -163,7 +185,7 @@ suite('Extension Tests', () => {
         // then
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
-        assert(fs.existsSync(path.join(newOutput, 'www', 'index.html')));
+        expectJsdocCommand({destination: path.join(newOutput, 'www'), sourceDirectory: getCurrentWorkspace()});
 
     });
 
@@ -172,7 +194,8 @@ suite('Extension Tests', () => {
         // given
         await initialize();
         const currentWs = vscode.workspace.workspaceFolders[0];
-        const tutorialsOutput = path.join(currentWs.uri.fsPath, 'out', 'tutorials');
+        const destination = path.join(currentWs.uri.fsPath, 'out', 'www');
+        const tutorialsOutput = path.join(destination,'..', 'tutorials');
         await updateConfig('tutorials', ['**/tutorials/*']);
 
         // when
@@ -181,6 +204,7 @@ suite('Extension Tests', () => {
         // then
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
+        expectJsdocCommand({destination, tutorials : tutorialsOutput, sourceDirectory : getCurrentWorkspace()});
         assert(fs.existsSync(path.join(tutorialsOutput, 'tutorial1.md')));
         assert(fs.existsSync(path.join(tutorialsOutput, 'tutorial2.md')));
 
@@ -206,6 +230,7 @@ suite('Extension Tests', () => {
         // given
         await initialize();
         await updateConfig('autoOpenBrowser', false);
+        const destination = path.join(getCurrentWorkspace(), 'out', 'www');
 
         // when
         await cmdOpenBrowser();
@@ -213,6 +238,8 @@ suite('Extension Tests', () => {
         // then
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
+        
+        expectJsdocCommand({destination, sourceDirectory: getCurrentWorkspace()});
 
     });
 
@@ -246,6 +273,24 @@ suite('Extension Tests', () => {
         assert(spyOpenUrl.calledOnce);
     });
 
+    test('the user has defined absolute configuration file in its setting', async () => {
+        // given
+        await initialize();
+        const workspaceFolder = vscode.workspace.workspaceFolders[0];
+        const destination = path.join(workspaceFolder.uri.fsPath, 'out', 'www');
+        const confFile = path.join(workspaceFolder.uri.fsPath, 'jsdoc.conf.json');
+        await updateConfig('confFile', confFile);
+
+        // when
+        await cmdOpenBrowser();
+
+        // then
+
+        expectJsdocCommand({destination, confFile, sourceDirectory : getCurrentWorkspace()});
+        assert(spyRunJsdoc.calledOnce);
+        assert(spyOpenUrl.calledOnce);
+    });
+
     test('the user has defined a setting for the deprecated previewjsdoc.conf configuration', async () => {
         // given
         await initialize();
@@ -254,30 +299,34 @@ suite('Extension Tests', () => {
             recurseDepth: 10,
             sourceType: 'module',
             tags: {
-              allowUnknownTags: true,
-              dictionaries: [
-                'jsdoc',
-                'closure',
-              ],
+                allowUnknownTags: true,
+                dictionaries: [
+                    'jsdoc',
+                    'closure',
+                ],
             },
             templates: {
-              cleverLinks: false,
-              monospaceLinks: false,
+                cleverLinks: false,
+                monospaceLinks: false,
             },
             opts: {
-              encoding: 'utf8',
-              recurse: true,
+                encoding: 'utf8',
+                recurse: true,
             },
-          });
+        });
 
         // when
         await cmdOpenBrowser();
 
         // then
         assert(!vscode.workspace.getConfiguration('previewjsdoc').get('conf'));
-        assert(vscode.workspace.getConfiguration('previewjsdoc').get('confFile'));
+        const confFile = vscode.workspace.getConfiguration('previewjsdoc').get<string>('confFile');
+        assert(confFile);
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
+        expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile, 
+                            sourceDirectory : getCurrentWorkspace()});
     });
 
     test('the user has defined a setting by pointing the old template layouting', async () => {
@@ -288,24 +337,24 @@ suite('Extension Tests', () => {
             recurseDepth: 10,
             sourceType: 'module',
             tags: {
-              allowUnknownTags: true,
-              dictionaries: [
-                'jsdoc',
-                'closure',
-              ],
+                allowUnknownTags: true,
+                dictionaries: [
+                    'jsdoc',
+                    'closure',
+                ],
             },
             templates: {
-              cleverLinks: false,
-              monospaceLinks: false,
-              default : {
-                  layoutFile : path.join(__dirname, '..', '..', 'layout.tmpl'),
-              },
+                cleverLinks: false,
+                monospaceLinks: false,
+                default: {
+                    layoutFile: path.join(__dirname, '..', '..', 'layout.tmpl'),
+                },
             },
             opts: {
-              encoding: 'utf8',
-              recurse: true,
+                encoding: 'utf8',
+                recurse: true,
             },
-          });
+        });
 
         // when
         await cmdOpenBrowser();
@@ -324,12 +373,29 @@ suite('Extension Tests', () => {
     test('the browser should not be opened if the user save a non accepted format', async () => {
         // given
         await initialize();
-        
+
         // when
         await saveAFile('nonSupportedFile.txt');
 
         // then
         assert(!spyRunJsdoc.calledOnce);
         assert(!spyOpenUrl.called);
+    });
+
+    test('the user has defined configuration file in its setting with include', async () => {
+        // given
+        await initialize();
+        await updateConfig('confFile', 'jsdoc.conf.with-include.json');
+
+        // when
+        await cmdOpenBrowser();
+
+        // then
+        assert(spyRunJsdoc.calledOnce);
+        assert(spyOpenUrl.calledOnce);
+        
+        expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile : 'jsdoc.conf.with-include.json', 
+                            sourceDirectory : undefined});
     });
 });

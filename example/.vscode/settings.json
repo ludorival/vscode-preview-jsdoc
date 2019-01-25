@@ -4,5 +4,5 @@
     "previewjsdoc.tutorials": [],
     "previewjsdoc.autoOpenBrowser": true,
     "previewjsdoc.conf": null,
-    "previewjsdoc.confFile": null
+    "previewjsdoc.confFile": "jsdoc.conf.with-include.json"
 }
