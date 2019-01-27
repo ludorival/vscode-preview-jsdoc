@@ -1,3 +1,6 @@
+## 2.0.5
+- Fix issue [#22](https://github.com/ludorival/vscode-preview-jsdoc/issues/22)
+
 ## 2.0.4
 - Quick patch after the 2.0.0 drop
 
