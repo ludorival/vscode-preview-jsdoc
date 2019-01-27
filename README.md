@@ -33,4 +33,3 @@ Look at the [Changelog](./CHANGELOG.md)
 ## Others
 
 This extension has been inspired from [Instant Markdown](https://github.com/dbankier/vscode-instant-markdown) extension.
-
