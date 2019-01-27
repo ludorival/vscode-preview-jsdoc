@@ -30,7 +30,7 @@ function formatFile(file: string) {
     if (!file.endsWith('.html')) {
         return data;
     }
-    const root = htmlparser.parse(data);
+    const root = htmlparser.parse(data) as htmlparser.HTMLElement;
     const head = root.querySelector('head') as htmlparser.HTMLElement;
     head.appendChild(new htmlparser.HTMLElement('link', {},
         'type="text/css" rel="stylesheet" href="styles/preview-jsdoc.css"'));
