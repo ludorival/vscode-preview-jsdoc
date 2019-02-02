@@ -92,6 +92,11 @@ interface IExpectOptions {
     withPrivate? : boolean,
     tutorials? : string
 }
+const normalizeToFsPatch = fsPath => {
+	const sampleFsPath = getCurrentWorkspace();
+	const isUnixStyle = sampleFsPath.includes("/");
+	return isUnixStyle ? fsPath.replace(/\\/gi, "/") : fsPath.replace(/\//gi, "\\");
+};
 const expectJsdocCommand = (options : IExpectOptions) => {
     options.withPrivate = !!options.withPrivate
     options.tutorials = options.tutorials;
@@ -382,48 +387,60 @@ suite('Extension Tests', () => {
         assert(!spyOpenUrl.called);
     });
 
-    test('the user has defined configuration file in its setting with include', async () => {
-		// ------
+    test('should pass source directory when the user has defined configuration file in its setting with include and edits a branching sibling directory', async () => {
         // given an included sub dir
         await initialize();
         await updateConfig('confFile', 'jsdoc.conf.with-include.json');
 		
-        // when editing a sibling directory or sub directory of a sibling
+        // when
 		await saveAFile("src/sub2/Line.js");
-        // then source directory should be included
+        // then pass the source directory
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
 		
         expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include.json', 
-                            sourceDirectory : `${getCurrentWorkspace()}/src/sub2`});
-    
-		// ------
-		// when editing a file in a parent directory
+                            sourceDirectory : normalizeToFsPatch(`${getCurrentWorkspace()}/src/sub2`)});
+	});
+	
+	test('should not pass source directory when the user has defined configuration file in its setting with include and edits a file in a parent folder', async () => {
+        // given
+        await initialize();
+        await updateConfig('confFile', 'jsdoc.conf.with-include.json');
+		
+		// when
 		await saveAFile("point.js");
+		
 		// then dont pass source directory in cli
 		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include.json', 
                             sourceDirectory : undefined});
-		
-		// ------
-		// when editing a file in a parent directory
-		await saveAFile("src/Circle.js");
-		// then dont pass source directory in cli
-		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
-                            confFile : 'jsdoc.conf.with-include.json', 
-                            sourceDirectory : undefined});
-		
-		// ------				
-		// given an included parent folder in jsdoc.conf.json
+	});
+	
+	test('should not pass source directory when the user has defined configuration file in its setting with include and edits a file in a sub folder', async () => {
+        // given
+        await initialize();
 		await updateConfig('confFile', 'jsdoc.conf.with-include-parent.json');
 		
-		// when editing a file in a subdirectory
+		// when 
 		await saveAFile("src/sub2/Line.js");
 		// then dont pass source directory in cli
 		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include-parent.json', 
                             sourceDirectory : undefined});
-
+		
+	});
+	
+	test('should not pass source directory when the user has defined configuration file in its setting with include and edits a file in the same folder', async () => {
+        // given
+        await initialize();
+		await updateConfig('confFile', 'jsdoc.conf.with-include-parent.json');
+		
+		// when 
+		await saveAFile("src/Circle.js");
+		// then dont pass source directory in cli
+		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile : 'jsdoc.conf.with-include-parent.json', 
+                            sourceDirectory : undefined});
 	});
 });
