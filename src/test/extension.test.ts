@@ -396,7 +396,7 @@ suite('Extension Tests', () => {
 		
         expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include.json', 
-                            sourceDirectory : `${getCurrentWorkspace()}\\src\\sub2`});
+                            sourceDirectory : `${getCurrentWorkspace()}/src/sub2`});
     
 		// ------
 		// when editing a file in a parent directory
