@@ -10,10 +10,11 @@ import { asAbsolutePath, copyFiles, spawnJsdoc } from './utils';
 
 function asIncludedInSource({source, root, sources}: {
     source: string, root: string, sources: string[]}): string | undefined {
-    const find = sources.map((value) => asAbsolutePath({source: value, root}))
-                        .map((absolutePath) => path.relative(absolutePath, source))
-                        .find((relativePath) => relativePath.startsWith('..'));
-    return find ? undefined : source;
+
+    const absolutePaths = sources.map((value) => asAbsolutePath({source: value, root}));
+    const sourceIsASibling = !absolutePaths.find((absolutePath) => absolutePath.indexOf(source) === 0 || source.indexOf(absolutePath) === 0);
+
+    return sourceIsASibling ? source : undefined;
 }
 
 interface IJsDocOptions {

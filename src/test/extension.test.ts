@@ -383,19 +383,47 @@ suite('Extension Tests', () => {
     });
 
     test('the user has defined configuration file in its setting with include', async () => {
-        // given
+		// ------
+        // given an included sub dir
         await initialize();
         await updateConfig('confFile', 'jsdoc.conf.with-include.json');
-
-        // when
-        await cmdOpenBrowser();
-
-        // then
+		
+        // when editing a sibling directory or sub directory of a sibling
+		await saveAFile("src/sub2/Line.js");
+        // then source directory should be included
         assert(spyRunJsdoc.calledOnce);
         assert(spyOpenUrl.calledOnce);
-        
+		
         expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include.json', 
+                            sourceDirectory : `${getCurrentWorkspace()}\\src\\sub2`});
+    
+		// ------
+		// when editing a file in a parent directory
+		await saveAFile("point.js");
+		// then dont pass source directory in cli
+		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile : 'jsdoc.conf.with-include.json', 
                             sourceDirectory : undefined});
-    });
+		
+		// ------
+		// when editing a file in a parent directory
+		await saveAFile("src/Circle.js");
+		// then dont pass source directory in cli
+		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile : 'jsdoc.conf.with-include.json', 
+                            sourceDirectory : undefined});
+		
+		// ------				
+		// given an included parent folder in jsdoc.conf.json
+		await updateConfig('confFile', 'jsdoc.conf.with-include-parent.json');
+		
+		// when editing a file in a subdirectory
+		await saveAFile("src/sub2/Line.js");
+		// then dont pass source directory in cli
+		expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            confFile : 'jsdoc.conf.with-include-parent.json', 
+                            sourceDirectory : undefined});
+
+	});
 });
