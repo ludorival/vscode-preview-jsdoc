@@ -2,7 +2,7 @@
   "name": "preview-jsdoc",
   "displayName": "Preview JSDOC",
   "description": "Provide a simple preview of your jsdoc",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "publisher": "ludorival",
   "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
   "repository": {
