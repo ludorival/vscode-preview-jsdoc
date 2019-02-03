@@ -92,7 +92,7 @@ interface IExpectOptions {
     withPrivate? : boolean,
     tutorials? : string
 }
-const normalizeToFsPatch = fsPath => {
+const normalizeFsPath = fsPath => {
 	const sampleFsPath = getCurrentWorkspace();
 	const isUnixStyle = sampleFsPath.includes("/");
 	return isUnixStyle ? fsPath.replace(/\\/gi, "/") : fsPath.replace(/\//gi, "\\");
@@ -400,7 +400,7 @@ suite('Extension Tests', () => {
 		
         expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include.json', 
-                            sourceDirectory : normalizeToFsPatch(`${getCurrentWorkspace()}/src/sub2`)});
+                            sourceDirectory : normalizeFsPath(`${getCurrentWorkspace()}/src/sub2`)});
 	});
 	
 	test('should not pass source directory when the user has defined configuration file in its setting with include and edits a file in a parent folder', async () => {
