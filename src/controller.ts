@@ -150,7 +150,7 @@ export class JsdocController {
                 `The setting previewjsdoc.conf is deprecated, it will be replaced by previewjsdoc.confFile instead`);
             const json = JSON.parse(JSON.stringify(jsdocConfig));
             const confFile = path.join(this.output, 'conf.json');
-            fs.writeFile(confFile, JSON.stringify(json, null, 2));
+            fs.writeFileSync(confFile, JSON.stringify(json, null, 2));
             await configuration.update('conf', null);
             await configuration.update('confFile', confFile);
         }
