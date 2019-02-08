@@ -1,3 +1,7 @@
+## 2.0.6
+- Fix issue [#25](https://github.com/ludorival/vscode-preview-jsdoc/issues/25
+- Thanks to Lukas Willin for its contribution 
+
 ## 2.0.5
 - Fix issue [#22](https://github.com/ludorival/vscode-preview-jsdoc/issues/22)
 
