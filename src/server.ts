@@ -41,7 +41,10 @@ function formatFile(file: string) {
 
 async function getAvailablePort(): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-        portfinder.getPort((err, port) => {
+        portfinder.getPort({
+            port: 3000,    // minimum port
+            stopPort: 3333 // maximum port
+        },(err, port) => {
             if (err) {
                 reject(err);
             } else {

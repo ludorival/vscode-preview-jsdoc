@@ -1,3 +1,6 @@
+## 2.0.7
+- Fix port range starting from 3000 issue [#27](https://github.com/ludorival/vscode-preview-jsdoc/issues/27)
+
 ## 2.0.6
 - Fix issue [#25](https://github.com/ludorival/vscode-preview-jsdoc/issues/25
 - Thanks to Lukas Willin for its contribution 
