@@ -70,7 +70,7 @@ export interface ISpawnJsDocOption {
 export function spawnJsdoc({destination, root, sourceDirectory, 
     confFile, withPrivate, tutorials} : ISpawnJsDocOption) {
     const args = [
-        jsdocPath,
+        '"' + jsdocPath + '"',
         '--verbose',
         '-d',
         `"${destination}"`,
