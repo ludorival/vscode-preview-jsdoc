@@ -26,7 +26,7 @@ before_deploy:
 deploy:
 - provider: script
   script: vsce publish -p $VSCODE_TOKEN
-  cleanup: false
+  skip_cleanup: true
   on:
     branch: master
     condition: "$TRAVIS_OS_NAME = osx"
