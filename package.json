@@ -78,12 +78,12 @@
     "copyfiles": "^1.2.0",
     "express": "^4.16.2",
     "jsdoc": "^3.5.5",
-    "jsdoc-api": "^4.0.3",
+    "jsdoc-api": "^5.0.4",
     "mkdirp": "^0.5.1",
     "node-html-parser": "^1.1.11",
     "opn": "^4.0.2",
     "portfinder": "^1.0.20",
-    "socket.io": "^1.7.2",
+    "socket.io": "^2.3.0",
     "walk-back": "^3.0.1"
   },
   "devDependencies": {
@@ -92,7 +92,7 @@
     "mock-require": "^3.0.3",
     "rimraf": "^2.6.3",
     "sinon": "^7.2.2",
-    "typescript": "^2.6.1",
+    "typescript": "^3.7.5",
     "vscode": "^1.1.6"
   }
 }
