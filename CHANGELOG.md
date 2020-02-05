@@ -1,3 +1,7 @@
+## 2.0.8
+- Fix issue when there is a space inside the jsdoc file path[#31](https://github.com/ludorival/vscode-preview-jsdoc/issues/31)
+- Thanks to fbarda for its contribution
+
 ## 2.0.7
 - Fix port range starting from 3000 issue [#27](https://github.com/ludorival/vscode-preview-jsdoc/issues/27)
 
