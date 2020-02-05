@@ -16,14 +16,15 @@ install:
 - npm run vscode:prepublish
 script:
 - export CODE_TESTS_WORKSPACE=$TRAVIS_BUILD_DIR/example
-- npm test
+- export CODE_VERSION=1.30.2
+- npm test --silent
 before_deploy:
 - npm install -g vsce;
 - vsce package;
 deploy:
 - provider: script
   script: vsce publish -p $VSCODE_TOKEN
-  skip_cleanup: true
+  cleanup: false
   on:
     branch: master
     condition: "$TRAVIS_OS_NAME = osx"
