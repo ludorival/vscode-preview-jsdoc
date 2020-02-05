@@ -16,7 +16,9 @@ install:
 - npm run vscode:prepublish
 script:
 - export CODE_TESTS_WORKSPACE=$TRAVIS_BUILD_DIR/example
-- export CODE_VERSION=1.30.2
+- if [ $TRAVIS_OS_NAME == "linux" ]; then
+    export CODE_VERSION=1.30.1;
+  fi
 - npm test --silent
 before_deploy:
 - npm install -g vsce;
