@@ -27,7 +27,7 @@
     var appendOutput = function(kind, message) {
         var span = document.createElement('span');
         span.classList.add('preview-jsdoc-' + kind);
-        span.innerText = message+'<br/>';
+        span.innerText = message+'\n';
         output.appendChild(span)
     }
     socket.onDidJsDocLogInfo = function (message) {
