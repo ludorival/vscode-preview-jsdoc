@@ -42,6 +42,7 @@ export async function runJsDoc(options: IJsDocOptions) {
     const configuration     = vscode.workspace.getConfiguration('previewjsdoc');
     const withPrivate       = configuration.get<boolean>('withPrivate');
     const overrideTutorials = configuration.get<string[]>('tutorials');
+    const customJsdocPath   = configuration.get<string>('jsdocBin');
     const jsdocConf         = checkAndGetJsDocConf(conf, workspaceFolder.uri.fsPath);
     const sourceDirectory   = asIncludedInSource({
         source :  path.resolve(source, '..'),
@@ -56,6 +57,7 @@ export async function runJsDoc(options: IJsDocOptions) {
         withPrivate,
         sourceDirectory,
         ...(overrideTutorials && overrideTutorials.length && { tutorials }),
+        customJsdocPath
     });
 
 }
@@ -94,9 +96,9 @@ async function mergeTutorials({ source, tutorials, onLogError, onLogInfo, worksp
 }
 
 async function executeCommand(
-    {workspaceFolder, configure, destination, withPrivate, sourceDirectory, tutorials, onLogInfo, onLogError}) {
+    {workspaceFolder, configure, destination, withPrivate, sourceDirectory, tutorials, onLogInfo, onLogError, customJsdocPath}) {
     return new Promise((resolve, reject) => {
-        const {spawn, args} = spawnJsdoc({destination, root: workspaceFolder.uri.fsPath, sourceDirectory, confFile : configure, tutorials, withPrivate})
+        const {spawn, args} = spawnJsdoc({destination, root: workspaceFolder.uri.fsPath, sourceDirectory, confFile : configure, tutorials, withPrivate, customJsdocPath})
         onLogInfo(`Execute the command line`);
         onLogInfo(`\tjsdoc ${args.join(' ')}`);
         spawn.stdout.on('data', (data) => {

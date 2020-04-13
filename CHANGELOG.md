@@ -1,3 +1,7 @@
+
+## 2.0.9
+- Add a setting option to set the jsdoc file path[#35](https://github.com/ludorival/vscode-preview-jsdoc/issues/35)
+
 ## 2.0.8
 - Fix issue when there is a space inside the jsdoc file path[#31](https://github.com/ludorival/vscode-preview-jsdoc/issues/31)
 - Thanks to fbarda for its contribution
