@@ -2,7 +2,7 @@
   "name": "preview-jsdoc",
   "displayName": "Preview JSDOC",
   "description": "Provide a simple preview of your jsdoc",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "publisher": "ludorival",
   "homepage": "https://github.com/ludorival/vscode-preview-jsdoc/blob/master/README.md",
   "repository": {
@@ -55,6 +55,10 @@
             "type": "boolean",
             "description": "Include symbols marked with the @private tag in the generated documentation. By default, private symbols are not included.",
             "default": false
+          },
+          "previewjsdoc.jsdocBin": {
+            "type": "string",
+            "description": "The absolute path of the jsdoc.js script to run instead of the locally installed one script. For exemple `/Users/xxx/.nvm/versions/node/v12.10.0/bin/jsdoc`.\nBy default, this is the installed one by the extension"
           }
         }
       }

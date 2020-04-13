@@ -24,6 +24,21 @@ This extension contributes the following settings:
 ```
 * `previewjsdoc.output`: set the output where the extension generates the conf.json, the root directory to store jsdoc generated files and the merged tutorials folder
 
+## Use a custom templates
+If you want to use a different template than the default one. You can set in your configuration file the location of this template.
+
+For example, if you want to use the template [fooDoc](https://www.npmjs.com/package/foodoc). 
+1. Get the absolute path where you installed this template.
+2. Update the configuration file like below
+```json
+{
+    "opts": {
+        ...
+        "template": "<root path>/node_modules/foodoc/template"
+    }
+}
+```
+3. Open the preview jsdoc browser or save a file to see the new template
 
 ## Release Notes
 

@@ -53,6 +53,7 @@ const initialize = async () => {
     await configuration.update('autoOpenBrowser', true);
     await configuration.update('confFile', null);
     await configuration.update('conf', null);
+    await configuration.update('jsdocBin', undefined);
     return configuration.update('output', 'out');
 };
 
@@ -90,15 +91,18 @@ interface IExpectOptions {
     sourceDirectory?: string,
     confFile? : string,
     withPrivate? : boolean,
-    tutorials? : string
+    tutorials? : string,
+    customJsdocPath?: string
 }
-const expectJsdocCommand = (options : IExpectOptions) => {
+const expectJsdocCommand = (options : IExpectOptions, expectFail: boolean = false) => {
     options.withPrivate = !!options.withPrivate
     options.tutorials = options.tutorials;
     options.confFile = options.confFile;
+    options.customJsdocPath = options.customJsdocPath || ''
     const arg = {root : vscode.workspace.workspaceFolders[0].uri.fsPath,
         ... options};
     sinon.assert.calledWith(spySpawnJsdoc, arg);
+    if (!expectFail)
     assert(fs.existsSync(path.join(options.destination, 'index.html')));
 }
 // Defines a Mocha test suite to group tests of similar kind together
@@ -437,5 +441,18 @@ suite('Extension Tests', () => {
         expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
                             confFile : 'jsdoc.conf.with-include-parent.json', 
                             sourceDirectory : undefined});
+    });
+
+    test('should use a custom jsdoc path instead of the installed one', async () => {
+        // given
+        await initialize();
+        await updateConfig('jsdocBin', 'myCustomJsdocNode/jsdoc.js');
+
+        // when 
+        await saveAFile("src/Circle.js");
+        // then the customJsdocPath should pass and the generation should fails since the node_module is wrong
+        expectJsdocCommand({destination : path.join(getCurrentWorkspace(), 'out', 'www'), 
+                            customJsdocPath: 'myCustomJsdocNode/jsdoc.js', 
+                            sourceDirectory : path.join(getCurrentWorkspace(), 'src')}, true);
     });
 });

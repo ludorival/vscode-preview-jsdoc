@@ -65,12 +65,14 @@ export interface ISpawnJsDocOption {
     sourceDirectory?: string,
     confFile? : string,
     withPrivate? : boolean,
-    tutorials? : string
+    tutorials? : string,
+    customJsdocPath?: string,
+    template?: string
 }
 export function spawnJsdoc({destination, root, sourceDirectory, 
-    confFile, withPrivate, tutorials} : ISpawnJsDocOption) {
+    confFile, withPrivate, tutorials, customJsdocPath} : ISpawnJsDocOption) {
     const args = [
-        '"' + jsdocPath + '"',
+        '"' + (customJsdocPath || jsdocPath) + '"',
         '--verbose',
         '-d',
         `"${destination}"`,
