@@ -89,7 +89,7 @@
     "node-html-parser": "^1.1.11",
     "opn": "^4.0.2",
     "portfinder": "^1.0.20",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.5.0",
     "walk-back": "^3.0.1"
   },
   "devDependencies": {
